@@ -5,97 +5,59 @@ from bs4 import BeautifulSoup
 import openpyxl
 from tracker.utils.sheet_utils import *
 import subprocess
- 
-html_doc = """<tbody><tr class="selected"><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 91.5911px; transform: translate(-32.5311%, -18.9441%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FniqwdvdLnoZ5aKzgWfX4%2Fthumb_photo.jpg?alt=media&amp;token=cc195d5b-41f1-4713-a557-4e63ffd992af" alt="Team"></div></div><div><div class="team-name">@bperl1#3268</div><div class="players">Noah Vasington and Nicolas Yabar</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32px; transform: translate(0%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2F1unQPvPqnR8Fvrnfrgvm%2Fthumb_photo.jpeg?alt=media&amp;token=d4145329-8362-475e-9960-5ec47af7011f" alt="Team"></div></div><div><div class="team-name">A/B</div><div class="players">Christian Bennett and Kyle Ackermann</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">All Gas No Brakes</div><div class="players">Josef Bekiranov and Nathaniel Hargrove</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Back2Basics</div><div class="players">Joey Maichen and Connor Nelson</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">backpack</div><div class="players">Cade Larson and Nickhil Anantha</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 50.88px; transform: translate(-18.5829%, -14.212%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2F2L086mUd9ZkDAjX4OvGY%2Fthumb_photo.jpeg?alt=media&amp;token=6b6ddb41-9d35-4342-a66d-dcd3c3dfb1b2" alt="Team"></div></div><div><div class="team-name">bad combo</div><div class="players">Will Picone and Rahul Murthy</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Bake and Shake</div><div class="players">David Gonzales and Matthew Burrows</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">BD Energy</div><div class="players">Brendan Ferreira and Dawson Morgan</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 47.9657px; transform: translate(-17.5207%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2Fro8ajhkTzH55th6PnZNo%2Fthumb_photo.jpeg?alt=media&amp;token=abb79234-9786-4e4f-877d-ddf4daa56535" alt="Team"></div></div><div><div class="team-name">Beeks/Drake</div><div class="players">Tommy Drake and Scott Beeks</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 42.88px; transform: translate(-8.75884%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2F8QfROpNJtP57mjC1Sikk%2Fthumb_photo.jpg?alt=media&amp;token=60fe9c83-975f-4b5e-9c50-b7535ce1a5e0" alt="Team"></div></div><div><div class="team-name">Benny Boo &amp; Jare Bear</div><div class="players">Jared Beaufait and Ben Savage</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 47.8673px; transform: translate(-14.815%, -12.963%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FnLqi73nfFeN0wHAumFMg%2Fthumb_photo.png?alt=media&amp;token=6217e709-3a07-4b53-bb46-97cb6ca76a9c" alt="Team"></div></div><div><div class="team-name">BorderLine</div><div class="players">Kaleb Wagner and Trey Thompson</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Bot House</div><div class="players">Owen Lippman and West Peterson</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">BOT Sons of Thunder</div><div class="players">Brycen Patterson and Kade Janikula</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32px; transform: translate(0%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2Fe5Yz8vgS7oPwLRW2BoBN%2Fthumb_photo.jpeg?alt=media&amp;token=c95c70cf-36d5-47df-863b-11bc6eb2f2d2" alt="Team"></div></div><div><div class="team-name">Brock Lesnar</div><div class="players">James Mitchum and Caleb Brock</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32.8px; transform: translate(-1.21951%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FIIK7DhcUDqDt8ro7rnjF%2Fthumb_photo.jpeg?alt=media&amp;token=b92cec19-a204-405d-90b3-98950963e7fb" alt="Team"></div></div><div><div class="team-name">BYE</div><div class="players">Michael Capobianco and Brody Ulrich</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 38.2357px; transform: translate(-8.49744%, -6.35593%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FctAtHatl364iA4zyEnWA%2Fthumb_photo.jpeg?alt=media&amp;token=9c1a7b7e-acf2-4d40-9f37-8fb0b366d421" alt="Team"></div></div><div><div class="team-name">Chilly Chillies</div><div class="players">Trevor Clements 704trev and Sean Brown</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Chosen</div><div class="players">Rendall Weaver and Caleb Cummings</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 40px; transform: translate(-7.6%, -27.5825%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FnfXwLpfLkgU7aAmjdugL%2Fthumb_photo.png?alt=media&amp;token=47de9575-5e76-4be7-9dac-19dc71a5a57a" alt="Team"></div></div><div><div class="team-name">Cigar Boys</div><div class="players">Dan Abrams and Grant Laughlin</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">ClubSpike Big Slick</div><div class="players">Chris Wilkins and Neal Bergman</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">CNU Dan Flashes</div><div class="players">Calvin Smith and James Richmond</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32px; transform: translate(0%, -12.5%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FxU3XKYtaBWpAuVQ7aCQH%2Fthumb_photo.jpg?alt=media&amp;token=702a2919-1570-4c80-ab47-bc0928791ac6" alt="Team"></div></div><div><div class="team-name">Coast To Coast</div><div class="players">Olivier Laurin and Nick Wideman</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 45.44px; transform: translate(-14.7887%, -14.7887%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2Fn95RRmX5QHJ0hNgjDedL%2Fthumb_photo.png?alt=media&amp;token=36eeb595-0094-4174-a437-47057842094a" alt="Team"></div></div><div><div class="team-name">Collateral Damage</div><div class="players">Liam Sherron and Andrew Gunter</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Come and Go</div><div class="players">Jake Mottershead and Mike Garrett</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 39.04px; transform: translate(-6.2636%, -17.6723%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2F6oig622D9cXT1xvZZ8Cd%2Fthumb_photo.jpeg?alt=media&amp;token=53ac4ba5-a8de-430e-8cce-ce686c2df953" alt="Team"></div></div><div><div class="team-name">Critical Hit</div><div class="players">Vincent Mathieu and Justin Barr</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32px; transform: translate(0%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2Fs1HzCAHkzlDsZ1HpcvpW%2Fthumb_photo.png?alt=media&amp;token=aa592bc6-df83-4a60-8238-808171aa51b7" alt="Team"></div></div><div><div class="team-name">Elixir</div><div class="players">Noah Luskus and Etienne Cote</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 44.16px; transform: translate(-13.7681%, -14.4928%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2F8ysDmXnvZtwHdTOH87JM%2Fthumb_photo.jpeg?alt=media&amp;token=9cbabc6d-cb45-4142-92f3-88c344c5b4f7" alt="Team"></div></div><div><div class="team-name">Evasive Maneuvers</div><div class="players">Jenson Miller and Michael Barkman</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 33.4743px; transform: translate(-4.40415%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FsTrtESaJq0xAM93Ykmqm%2Fthumb_photo.jpeg?alt=media&amp;token=555824af-6100-4b96-a2e9-910086f5cd26" alt="Team"></div></div><div><div class="team-name">Faulty Service</div><div class="players">Brayden Latham and Joe LaRuffa</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Flying Clutchmen</div><div class="players">Sam Bunze and Zach Snover</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Free Point Dif</div><div class="players">Josh Hutko and Michael Lin</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Glitch</div><div class="players">Luke Nickel and Cody Dryer</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 72.8361px; transform: translate(-27.9132%, -27.3026%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FaNofqi5RqzrPIbL95CbN%2Fthumb_photo.jpeg?alt=media&amp;token=e0e86020-285e-4391-927f-58db7f54b73d" alt="Team"></div></div><div><div class="team-name">Glizzy Gladiators</div><div class="players">Jacob Summers and Polk Denmark</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32px; transform: translate(0%, -21.8891%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2F3oN8mWq7BM4Y0GgUdKZD%2Fthumb_photo.png?alt=media&amp;token=f1feadbc-4e1a-4a4e-bfee-f65f465e1617" alt="Team"></div></div><div><div class="team-name">Griddy Guys</div><div class="players">Tim Lacagnina and Rob's Traveler</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 39.68px; transform: translate(-10.5249%, -31.5301%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FGbPmyKUgQNgO5kpD3ocl%2Fthumb_photo.png?alt=media&amp;token=32480b70-14ea-4620-bc36-1fc12b42f6f0" alt="Team"></div></div><div><div class="team-name">Hilltop Spikes</div><div class="players">Cole Model and Max Model</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Ilan’s older brothers</div><div class="players">Adin Klassen and Luke Repass</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Inarizaki </div><div class="players">Alex Daly and A.j. Martin</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 66.304px; transform: translate(-26.0114%, -14.4599%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2Fpc5G7yFqPiurLoBxmqgp%2Fthumb_photo.jpeg?alt=media&amp;token=11227bbb-84e0-4cd7-b02e-e9d3ff25a2d5" alt="Team"></div></div><div><div class="team-name">Jersey Boyz</div><div class="players">Matt Spolarich and Corey Weiss</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Jiddy</div><div class="players">Connor Reid and Jacob Arzaga</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Judgment Day</div><div class="players">Fredric Hinkle and Gabriel Finocchi</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 45.9322px; transform: translate(-16.0827%, -9.88447%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FoJNbhswNMQMDB9D5al1V%2Fthumb_photo.png?alt=media&amp;token=b0ab834d-0b55-4389-881a-44f13bcfefb2" alt="Team"></div></div><div><div class="team-name">Kingdom Come</div><div class="players">Grant Klapwijk and Matthew Cole</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 50.0517px; transform: translate(-18.0331%, -17.1053%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FJwEw6GMEIuglNQSfCnku%2Fthumb_photo.png?alt=media&amp;token=fd04a777-0b20-429d-afea-463986789df3" alt="Team"></div></div><div><div class="team-name">Limitless Faith</div><div class="players">Andrew Raber and Ethan Domster</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Monmouth Spikes</div><div class="players">Connor Prelich and Demitri Forand</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">PRIME</div><div class="players">Andrew Christmas and Josh Weinbach</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 46.2056px; transform: translate(-15.3722%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FxO1EZRlwfcQQGrul9pha%2Fthumb_photo.jpeg?alt=media&amp;token=bcc558c0-2d54-4439-a9c3-e77a63ca9595" alt="Team"></div></div><div><div class="team-name">Profit Boost</div><div class="players">Kieran Rose and Justin Shaytar</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 42.6667px; transform: translate(-4.60526%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2F4447zJaWeGHeg5MUoWdk%2Fthumb_photo.jpeg?alt=media&amp;token=8236c75c-1dfa-4dd5-8454-c6ff8c031643" alt="Team"></div></div><div><div class="team-name">Project Roundnet</div><div class="players">Samuel Corey and Josh Esposo</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">PruGu</div><div class="players">Lucas Pruett and Sunny Gu</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Quality Service</div><div class="players">Jacob Payer and Andrew Kosche</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 34.56px; transform: translate(-3.14327%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FADyLncdwHP9LQZLesMfA%2Fthumb_photo.png?alt=media&amp;token=e2305a01-d560-46aa-9ab9-388ea19e661d" alt="Team"></div></div><div><div class="team-name">Rogue</div><div class="players">Thomas Hamilton and Ryan Marino</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Savage Mode 2</div><div class="players">Nate KT and Benjamin Bunze</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32px; transform: translate(0%, -17.7524%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2Fvqxmfw6QwFR1jL1dv3fl%2Fthumb_photo.jpg?alt=media&amp;token=32a7412d-a616-404c-b371-0dccb5c41014" alt="Team"></div></div><div><div class="team-name">sexy</div><div class="players">Élie Pilon and Vincent Bastrash</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32px; transform: translate(0%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2Fduj2a7GzAfWYPeAylOtb%2Fthumb_photo.jpeg?alt=media&amp;token=09dd64c4-7ec4-4388-930f-58372ddb8a3b" alt="Team"></div></div><div><div class="team-name">Shorter &amp; Taller</div><div class="players">Andrew Sullivan and Caleb Shorter</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Sick Nasty</div><div class="players">Joel Lapp and alex stan</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Skill Gapped</div><div class="players">Donavon Stell and Cole Maddox</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 38.9958px; transform: translate(-9.67197%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FusvQUwAKimNJQSFyJWfU%2Fthumb_photo.jpg?alt=media&amp;token=986e2744-84e4-4209-aa8c-41e36f3a5e91" alt="Team"></div></div><div><div class="team-name">Small Dawgz</div><div class="players">Sam Mccune and Nolan Marolf</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">SOSD</div><div class="players">Brian Perlson and Ezra Dantowitz</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Spidey Sense</div><div class="players">Jack Dumouchel and William Glowacky</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32px; transform: translate(0%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FB1pcNSYPqrHVZKu4CWyq%2Fthumb_photo.png?alt=media&amp;token=a473d57e-ff9d-44f9-b97b-2feb16e24d20" alt="Team"></div></div><div><div class="team-name">SubZero</div><div class="players">Adam Porter and Zach Bender</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Sunday Special</div><div class="players">Owen Bass and Peter Lu</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 33.3241px; transform: translate(-3.97351%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FNFsSMi2lYY11OiJ1LoFz%2Fthumb_photo.jpeg?alt=media&amp;token=18f6fe35-68ba-4b2a-b63b-9a365d169823" alt="Team"></div></div><div><div class="team-name">The Diamond Dogs</div><div class="players">Bennett Anderson and Reid Pfutzenreuter</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 33.28px; transform: translate(-1.92308%, -21.5334%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FnrGPA0kEfxInSG7BTOjh%2Fthumb_photo.jpeg?alt=media&amp;token=b0718bad-0fcf-49a4-9a62-90cd38dc7d99" alt="Team"></div></div><div><div class="team-name">the Red House</div><div class="players">Matt Morelli and Ian Timan</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">Trevor’s Teddy Bear</div><div class="players">Trevor Barbosa and Anthony Clifford</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 32px; transform: translate(0%, -2.59319%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FZGQfTTXMUyIV8lQEWDOb%2Fthumb_photo.jpeg?alt=media&amp;token=905db915-51b9-49ef-9c14-46b5ecf82687" alt="Team"></div></div><div><div class="team-name">TRP Spotless</div><div class="players">Ryan Gross and Joe Bondi</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 48px; transform: translate(-16.6667%, 0%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FUgwU6XxV6t8MBuxwi7Du%2Fthumb_photo.jpeg?alt=media&amp;token=b64ad71b-7c02-4bf1-aaf7-e60fd40d37a6" alt="Team"></div></div><div><div class="team-name">Walter White's Tighty Whities</div><div class="players">Henry Pilliod and Aniket Matharasi</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div class="PositionedImage__Wrapper-sc-1nn330u-0 eXa-dtp team-picture" style="width: 32px; height: 32px; border-radius: 16px;"><div class="PositionedImage__Container-sc-1nn330u-1 kdnSiE" style="width: 41.92px; transform: translate(-11.3321%, -11.3321%);"><img src="https://firebasestorage.googleapis.com/v0/b/roundnet-4e9b0.appspot.com/o/team%2FtANDpFeWxDxSRbjtaHQo%2Fthumb_photo.jpeg?alt=media&amp;token=533281eb-bea4-4c0e-bc0e-15d48f3a7cab" alt="Team"></div></div><div><div class="team-name">White Lotus Roundnet</div><div class="players">Ely Marciano and Mitchell Carter</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr><tr class=""><td class="team-column"><div class="Resultsstyle__StyledTeamItem-sc-ys52qf-4 hvmgDq"><div size="32" class="TeamPicture__PlaceholderPicture-sc-qd2z7o-0 eSDykQ team-picture"><i class="fas fa-user-friends" aria-hidden="true" style="font-size: 18.65px;"></i></div><div><div class="team-name">WySpike Butterfingers</div><div class="players">Colton Mowry and Garrett Hornok</div></div></div></td><td class="record-column"><span>0W - 0L</span></td><td class="icon-column"><i class="fas fa-chevron-right" aria-hidden="true"></i></td></tr></tbody>"""
+import argparse
  
 def main():
+    parser = argparse.ArgumentParser(
+        description="Utility for calculating pools given an html document",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+
+    parser.add_argument(
+        '-t',
+        dest="tournament",
+        default=None,
+        required=True,
+        help="Input to specify what tournament to generate pools for [default: %(default)s]"
+    )
+    parser.add_argument(
+        '-m',
+        dest="major",
+        default=False,
+        required=False,
+        action="store_true",
+        help="Input to specify that the tournament is a major [default: %(default)s]"
+    )
+
+    args = parser.parse_args(args=None if sys.argv[1:] else ['-h'])
+
+    file = args.tournament
+    is_major = args.major
+
     cmd = 'python ./tracker/update_sheet.py'
     p = subprocess.Popen(cmd)
     p.wait()
 
+    html_doc = readFile(file)
     soup = BeautifulSoup(html_doc, 'html.parser')
     teams = getTeams(soup)
     teams = mergeSort(teams)
     
-    createTeamsSheet(teams)
-    createPoolsSheet(teams)
-
- 
-def getTeams(soup):
-    teams = []
-    teamNames = []
-    playerOnes = []
-    playerTwos = []
-    points = getPoints()
-
-    for team in soup.findAll('div', attrs = {'class':'team-name'}):
-        teamNames.append(team.text)
- 
-    for team in soup.findAll('div', attrs = {'class':'players'}):
-        players = team.text
-        andIndex = players.find(" and ")
-        playerOne = players[0:andIndex]
-        playerTwo = players[andIndex+5:]
-        playerOnes.append(playerOne)
-        playerTwos.append(playerTwo)
- 
-    for i in range(len(teamNames)):
-        team = []
-        team.append(teamNames[i])
-        team.append(playerOnes[i])
-        playerOnePoints = getPlayerPoints(playerOnes[i], points)
-        team.append(playerOnePoints)
-        team.append(playerTwos[i])
-        playerTwoPoints = getPlayerPoints(playerTwos[i], points)
-        team.append(playerTwoPoints)
-        team.append(playerOnePoints + playerTwoPoints)
-        teams.append(team)
-    return teams
+    createPoolsWorkbook(teams, is_major, file)
 
 
-def getPlayerPoints(player, points):
-    if player in points.keys():
-        return points[player]
-    return 0
-
-
-def mergeSort(teams : list):
-    if len(teams) == 1:
-        return [teams[0]]
-    else:
-        index = int(len(teams)/2)
-        left = mergeSort(teams[:index])
-        right =  mergeSort(teams[index:])
-        return merge(left, right)
-    
-
-def merge(left : list, right : list):
-    l = 0
-    r = 0
-    sorted_list = []
-    while l < len(left) and r < len(right):
-        if left[l][5] < right[r][5]:
-            sorted_list.append(right[r])
-            r += 1
-        else:
-            sorted_list.append(left[l])
-            l += 1
-    while l < len(left):
-        sorted_list.append(left[l])
-        l += 1
-    while r < len(right):
-        sorted_list.append(right[r])
-        r += 1
-    return sorted_list
-
-
-def createTeamsSheet(teams):
-    wb = openpyxl.Workbook()
+def createPoolsWorkbook(teams, is_major, file):
+    wb = getWorkBook(str(os.path.basename(file)).split(".")[0])
     wb = removeSheets(wb)
+    createTeamsSheet(teams, wb)
+    createPoolsSheets(teams, is_major, wb)
+
+
+def createTeamsSheet(teams, wb):
     teamNames = ['Teams']
     playerOnes = ['Player One']
-    playerOnePoints = ['Player One Points']
     playerTwos = ['Player Two']
+    playerOnePoints = ['Player One Points']
     playerTwoPoints = ['Player Two Points']
     teamPoints = ['Team Points']
 
@@ -106,32 +68,49 @@ def createTeamsSheet(teams):
         playerTwos.append(team[3])
         playerTwoPoints.append(team[4])
         teamPoints.append(team[5])
-    data = [teamNames, playerOnes, playerOnePoints, playerTwos, playerTwoPoints, teamPoints]
+    data = [teamNames, playerOnes, playerTwos, playerOnePoints, playerTwoPoints, teamPoints]
     wb = writeToSheet(data, wb, "Teams")
 
     saveWorkBook(wb, 'pool_calculations.xlsx')
 
 
-def createPoolsSheet(teams):
-    wb = getWorkBook('pool_calculations.xlsx')
+def createPoolsSheets(teams, is_major, wb):
+    if is_major == True:
+        wb = writeToSheet(getPools(teams, 4, True), wb, "Pools of 4")
+        wb = writeToSheet(getPools(teams, 5, True), wb, "Pools of 5")
+    else:
+        wb = writeToSheet(getPools(teams, 4, False), wb, "Pools of 4")
+        wb = writeToSheet(getPools(teams, 5, False), wb, "Pools of 5")
+        wb = writeToSheet(getPools(teams, 6, False), wb, "Pools of 6")
+        wb = writeToSheet(getPools(teams, 7, False), wb, "Pools of 7")
+
+    saveWorkBook(wb, 'pool_calculations.xlsx')
+
+
+def getPools(teams, pool_size, is_major):
     change = 0
-    numPools = int(math.floor(len(teams)/4))
-    numPowerPools = 4
+    numPools = int(math.ceil((len(teams)-1)/pool_size))
+    numPowerPools = getNumPowerPools(is_major, teams)
     pools = ['Pool']
     teamNames = ['Team Name']
     playerOnes = ['Player One']
     playerTwos = ['Player Two']
     poolNum = 1
 
+    print(f"Pool Size: {pool_size}")
+    print(f"Num Pools: {numPools}")
+    print(f"Num Power Pools: {numPowerPools}")
+    print()
+
     
-    for i in range(4*numPools):
+    for i in range(len(teams)):
         team = teams[i]
         pools.append(poolNum)
         teamNames.append(team[0])
         playerOnes.append(team[1])
         playerTwos.append(team[3])
 
-        if i < 4*numPowerPools-2:
+        if i < pool_size*numPowerPools-2:
             if change != 2:
                 if change == 0:
                     if poolNum < numPowerPools:
@@ -150,7 +129,7 @@ def createPoolsSheet(teams):
                 else:
                     poolNum += 1
                     change = 0
-        elif i == 4*numPowerPools-1:
+        elif i == pool_size*numPowerPools-1:
             poolNum = numPowerPools+1
             change = 0
         else:
@@ -173,9 +152,91 @@ def createPoolsSheet(teams):
                     poolNum += 1
                     change = 0
         
-    data = [pools, teamNames, playerOnes, playerTwos]
-    wb = writeToSheet(data, wb, "Pools")
-    saveWorkBook(wb, 'pool_calculations.xlsx')
+    return [pools, teamNames, playerOnes, playerTwos]
+
+
+def getTeams(soup):
+    teams = []
+    teamNames = []
+    playerOnes = []
+    playerTwos = []
+    points = getPoints()
+
+    for team in soup.findAll('div', attrs = {'class':'team-name'}):
+        teamNames.append(team.text)
+
+    for team in soup.findAll('div', attrs = {'class':'players'}):
+        players = team.text
+        andIndex = players.find(" and ")
+        playerOne = players[0:andIndex]
+        playerTwo = players[andIndex+5:]
+        playerOnes.append(playerOne)
+        playerTwos.append(playerTwo)
+
+    for i in range(len(teamNames)):
+        team = []
+        team.append(teamNames[i])
+        team.append(playerOnes[i])
+        playerOnePoints = getPlayerPoints(playerOnes[i], points)
+        team.append(playerOnePoints)
+        team.append(playerTwos[i])
+        playerTwoPoints = getPlayerPoints(playerTwos[i], points)
+        team.append(playerTwoPoints)
+        team.append(playerOnePoints + playerTwoPoints)
+        teams.append(team)
+    return teams
+
+
+def getNumPowerPools(is_major, teams):
+    if is_major:
+        if len(teams) < 9:
+            return 0
+        if len(teams) > 8 and len(teams) < 24:
+            return 1
+        if len(teams) > 23 and len(teams) < 44:
+            return 2
+        if len(teams) > 43 and len(teams) < 64:
+            return 3
+        if len(teams) > 63:
+            return 4
+    else:
+        return 0
+
+
+def getPlayerPoints(player, points):
+    if player in points.keys():
+        return points[player]
+    return 0
+
+
+def mergeSort(teams : list):
+    if len(teams) == 1:
+        return [teams[0]]
+    else:
+        index = int(len(teams)/2)
+        left = mergeSort(teams[:index])
+        right =  mergeSort(teams[index:])
+        return merge(left, right)
+
+
+def merge(left : list, right : list):
+    l = 0
+    r = 0
+    sorted_list = []
+    while l < len(left) and r < len(right):
+        if left[l][5] < right[r][5]:
+            sorted_list.append(right[r])
+            r += 1
+        else:
+            sorted_list.append(left[l])
+            l += 1
+    while l < len(left):
+        sorted_list.append(left[l])
+        l += 1
+    while r < len(right):
+        sorted_list.append(right[r])
+        r += 1
+    return sorted_list
 
  
 def getPoints():
@@ -188,6 +249,12 @@ def getPoints():
         points[str(key)] = sheet.cell(row=i+1, column=2).value
 
     return points
+
+
+def readFile(file : str):
+    with open(file, "r", encoding="utf8") as f:
+        html_doc = f.readlines()
+    return html_doc[0]
 
  
 if __name__=="__main__":
