@@ -4,16 +4,14 @@ import sys
 from bs4 import BeautifulSoup
 import openpyxl
 from tracker.utils.sheet_utils import *
+from tracker.utils.scrape_utils import *
 from objects.Team import Team
 from objects.Player import Player
 from objects.Pool import Pool
 import subprocess
 import argparse
 
-REPEAT = 0
-INCREASE = 1
-DECREASE = 2
- 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Utility for calculating pools given an html document",
@@ -75,93 +73,112 @@ def createTeamsSheet(teams, wb):
         playerTwos.append(team.getPlayerTwo().getName())
         playerTwoPoints.append(team.getPlayerTwo().getPoints())
         teamPoints.append(team.getPlayerOne().getPoints() + team.getPlayerTwo().getPoints())
-    data = [teamNames, playerOnes, playerTwos, playerOnePoints, playerTwoPoints, teamPoints]
+    data = [playerOnes, playerOnePoints, playerTwos, playerTwoPoints, teamNames, teamPoints]
     wb = writeToSheet(data, wb, "Teams")
 
     saveWorkBook(wb, 'pool_calculations.xlsx')
 
 
 def createPoolsSheets(teams, is_major, wb):
-    min_pools = math.floor(len(teams)/8)
-    max_pools = math.ceil(len(teams)/4)
+    num_power_pools = 0
+    if is_major:
+        num_power_pools = getNumPowerPools(teams)
+        min_pools = math.ceil((len(teams)-(num_power_pools*4))/5)
+        max_pools = math.floor((len(teams)-(num_power_pools*4))/4)
+    else:
+        min_pools = math.ceil(len(teams)/8)
+        max_pools = math.floor(len(teams)/4)
+    
     num_pools = min_pools
-    num_power_pools = getNumPowerPools(is_major, teams)
-
-    # while num_pools < max_pools:
-        # wb = writeToSheet(getPools(teams, num_pools, num_power_pools), wb, f"{num_pools + num_power_pools} Pools")
-    pools = getPools(teams, num_pools, num_power_pools)
-    for pool in pools:
-        pool.printPool()
-    num_pools += 1
-
+    
+    teams, power_pools = getPowerPools(teams, num_power_pools)
+    
+    while num_pools <= max_pools:
+        pools = getPools(teams, num_pools, num_power_pools)
+        wb = writePoolsToSheet(wb, power_pools, pools)
+        num_pools += 1
     saveWorkBook(wb, 'pool_calculations.xlsx')
 
 
-def getPools(teams, num_pools, num_power_pools):
-    pools = []
-    poolNum = 1
-    change = REPEAT
-
-    for i in range(num_pools + num_power_pools):
-        pools.append(Pool(i+1))
-
-    for i in range(len(teams)):
-        print(f"I: {i}, Len: {len(teams)}")
-        team = teams[i]
-        pools[poolNum].addTeam(team)
-
-        if i < 4*num_power_pools-2:
-            if change != DECREASE:
-                if change == 0:
-                    if poolNum < num_power_pools:
-                        poolNum += 1
-                    else:
-                        change = DECREASE
-                else:
-                    if poolNum > 1:
-                        poolNum -= 1
-                    else:
-                        change = DECREASE
-            else:
-                if poolNum == num_power_pools:
-                    change = INCREASE
-                    poolNum -= 1
-                else:
-                    poolNum += 1
-                    change = REPEAT
-        elif i == 4*num_power_pools-1:
-            poolNum = num_power_pools+1
-            change = 0
-        else:
-            if change != DECREASE:
-                if change == REPEAT:
-                    if poolNum < num_pools:
-                        poolNum += 1
-                    else:
-                        change = DECREASE
-                else:
-                    if poolNum > num_power_pools+1:
-                        poolNum -= INCREASE
-                    else:
-                        change = DECREASE
-            else:
-                if poolNum == num_pools:
-                    poolNum -= 1
-                    change = INCREASE
-                else:
-                    poolNum += 1
-                    change = REPEAT
-        
-    return pools
+def getPoolNum(num_pools : int, index : int, offset : int):
+    iteration = int(math.floor(index/num_pools))
+    if iteration % 2 == 0:
+        pool_num = (index%num_pools)
+    else:
+        pool_num = num_pools-(index%num_pools)-1
+    return pool_num + offset + 1
 
 
-def getPowerPoolIndeces(num_power_pools):
-    pools = {}
-    print(f"Power Pools: {num_power_pools}")
+def getPowerPools(teams : list, num_power_pools : int):
+    power_pools = {}
     for i in range(num_power_pools):
-        pools[i+1] = [i+1, 2*num_power_pools-i%num_power_pools, 2*num_power_pools+(i%num_power_pools)+1, 4*num_power_pools-i%num_power_pools]
+        power_pools[i+1] = Pool(i+1)
+    for i in range(num_power_pools*4):
+        pool_num = getPoolNum(num_power_pools, i, 0)
+        team = teams.pop(0)
+        power_pools[pool_num].addTeam(team)
+    return teams, power_pools
+
+
+def getPools(teams : list, num_pools : int, num_power_pools : int):
+    pools = {}
+    teams_copy = teams.copy()
+    team_num = 0
+    for i in range(num_pools):
+        pools[i+1+num_power_pools] = Pool(i+1+num_power_pools)
+    while len(teams_copy) > 0:
+        pool_num = getPoolNum(num_pools, team_num, num_power_pools)
+        # print(f"Pool Num: {pool_num}")
+        team = teams_copy.pop(0)
+        pools[pool_num].addTeam(team)
+        team_num += 1
     return pools
 
+
+def writePoolsToSheet(wb, power_pools, pools):
+    pool_nums = ['Pool']
+    teamNames = ['Team Name']
+    playerOnes = ['Player One']
+    playerTwos = ['Player Two']
+    playerOnePoints = ['Player One Points']
+    playerTwoPoints = ['Player Two Points']
+    teamPoints = ['Team Points']
+    for pool in power_pools.keys():
+        for team in power_pools[pool].getTeams():
+            pool_nums.append(power_pools[pool].getPoolNum())
+            teamNames.append(team.getTeamName())
+            playerOnes.append(team.getPlayerOneName())
+            playerTwos.append(team.getPlayerTwoName())
+            playerOnePoints.append(team.getPlayerOne().getPoints())
+            playerTwoPoints.append(team.getPlayerTwo().getPoints())
+            teamPoints.append(team.getPoints())
+        pool_nums.append("")
+        teamNames.append("")
+        playerOnes.append("")
+        playerTwos.append("")
+        playerOnePoints.append("")
+        playerTwoPoints.append("")
+        teamPoints.append("")
+
+    for pool in pools.keys():
+        for team in pools[pool].getTeams():
+            pool_nums.append(pools[pool].getPoolNum())
+            teamNames.append(team.getTeamName())
+            playerOnes.append(team.getPlayerOneName())
+            playerTwos.append(team.getPlayerTwoName())
+            playerOnePoints.append(team.getPlayerOne().getPoints())
+            playerTwoPoints.append(team.getPlayerTwo().getPoints())
+            teamPoints.append(team.getPoints())
+        pool_nums.append("")
+        teamNames.append("")
+        playerOnes.append("")
+        playerTwos.append("")
+        playerOnePoints.append("")
+        playerTwoPoints.append("")
+        teamPoints.append("")
+    data = [pool_nums, teamNames, playerOnes, playerTwos, playerOnePoints, playerTwoPoints, teamPoints]
+    wb = writeToSheet(data, wb, f"{len(power_pools) + len(pools)} Pools")
+    return wb
 
 
 def getTeams(soup):
@@ -177,8 +194,8 @@ def getTeams(soup):
     for team in soup.findAll('div', attrs = {'class':'players'}):
         players = team.text
         andIndex = players.find(" and ")
-        playerOnes.append(Player(players[0:andIndex], getPlayerPoints(players[0:andIndex], points)))
-        playerTwos.append(Player(players[andIndex+5:], getPlayerPoints(players[andIndex+5:], points)))
+        playerOnes.append(Player(cleanName(players[0:andIndex]), getPlayerPoints(cleanName(players[0:andIndex]), points)))
+        playerTwos.append(Player(cleanName(players[andIndex+5:]), getPlayerPoints(cleanName(players[andIndex+5:]), points)))
 
     for i in range(len(teamNames)):
         team = Team(teamNames[i], playerOnes[i], playerTwos[i])
@@ -187,20 +204,17 @@ def getTeams(soup):
     return teams
 
 
-def getNumPowerPools(is_major, teams):
-    if is_major:
-        if len(teams) < 9:
-            return 0
-        if len(teams) > 8 and len(teams) < 24:
-            return 1
-        if len(teams) > 23 and len(teams) < 44:
-            return 2
-        if len(teams) > 43 and len(teams) < 64:
-            return 3
-        if len(teams) > 63:
-            return 4
-    else:
+def getNumPowerPools(teams):
+    if len(teams) < 9:
         return 0
+    if len(teams) > 8 and len(teams) < 24:
+        return 1
+    if len(teams) > 23 and len(teams) < 44:
+        return 2
+    if len(teams) > 43 and len(teams) < 64:
+        return 3
+    if len(teams) > 63:
+        return 4
 
 
 def getPlayerPoints(player, points):

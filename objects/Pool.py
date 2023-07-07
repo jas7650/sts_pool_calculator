@@ -12,6 +12,9 @@ class Pool(object):
     def getTeams(self):
         return self.teams
     
+    def getPoolNum(self):
+        return self.pool_num
+    
     def printPool(self):
         print(f"Pool {self.pool_num}")
         print("Teams:")
