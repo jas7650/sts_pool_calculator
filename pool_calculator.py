@@ -59,7 +59,7 @@ def createPoolsWorkbook(teams, is_major, file):
 
 
 def createTeamsSheet(teams, wb):
-    teamNames = ['Teams']
+    teamNames = ['Team']
     playerOnes = ['Player One']
     playerTwos = ['Player Two']
     playerOnePoints = ['Player One Points']
@@ -73,7 +73,7 @@ def createTeamsSheet(teams, wb):
         playerTwos.append(team.getPlayerTwo().getName())
         playerTwoPoints.append(team.getPlayerTwo().getPoints())
         teamPoints.append(team.getPlayerOne().getPoints() + team.getPlayerTwo().getPoints())
-    data = [playerOnes, playerOnePoints, playerTwos, playerTwoPoints, teamNames, teamPoints]
+    data = [teamNames, playerOnes, playerOnePoints, playerTwos, playerTwoPoints, teamPoints]
     wb = writeToSheet(data, wb, "Teams")
 
     saveWorkBook(wb, 'pool_calculations.xlsx')
